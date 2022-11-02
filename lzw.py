@@ -5,9 +5,6 @@ import cv2
 from PIL import Image
 import numpy as np
 
-
-
-
 def compress(input):
     DICTIONARY_SIZE = 256
     PixelsInput=set(input)
@@ -20,28 +17,25 @@ def compress(input):
         dictionary[str(pixel).zfill(3)] = pixel
     
     
-    #Lecture du caractère suivant:
-    for p in input:# le type de c est int
-        #temp howa w
-        #temp2 howa k le caractère suivant
+    # Read the next pixel:
+    for p in input:
         # We convert the pixels into str to concatenate them
         p=str(p).zfill(3) 
+        # temp2 is the next pixel
         temp2 = temp+p
-        if temp2 in dictionary: #if wk fi Dictionary
-            temp = temp2 #w = wk
+        if temp2 in dictionary: #if temp+p is in the Dictionary
+            temp = temp2 #temp=temp+p
         else:
-            #Production du code en sortie:
+            # Production of output code:
             result.append(dictionary[temp]) #output (code (w))
             dictionary[temp2] = DICTIONARY_SIZE #Dictionary <- wk
             DICTIONARY_SIZE+=1
-            #Mise à jour de la sous chaine temporaire (w):
-            temp = ""+p #w=k
+            # Update of the temporary sub string:
+            temp = ""+p 
 
     if temp != "":
         result.append(dictionary[temp])  
 
-    print('compression:------------------------------------------------------------')  
-    print(result)    
     return result
 
 def decompress(input,width,height):
@@ -60,7 +54,6 @@ def decompress(input,width,height):
     input = input[1:] 
     result.append(dictionary[previous])# Output Dict[k]
     
-    # While ( read k )
     for pixels in input:
         aux = ""
 
@@ -73,36 +66,33 @@ def decompress(input,width,height):
         # Production of the output decoding (Output Dict[k]):           
         result.append(aux)
 
-        # Add w Dict[k][0] to dictionary:
+        # Add previous Dict[aux][0] to dictionary:
         dictionary[DICTIONARY_SIZE] = str(previous)+ aux[:3]
         DICTIONARY_SIZE+= 1
-        #w = Dict[k]
-        #Mise à jour de la sous chaine temporaire (w):        
+        # previous = Dict[k]
+        # Update of the temporary sub string:       
         previous = aux
 
     #transform a list (result) into an image  
-    print('decompression:------------------------------------------------------------')
-    print(result)
     toImage(result,width,height)
 
     return result
 
 def toImage(result,width,height):
-    # On parcours les valeurs décodé on on les decomposes sur 3 caracteres pour les convertirs ensuite
+    # Go through the decoded values and decompose them on 3 characters to convert them afterwards
     ListImage=[]
     for value in result:
         for i in range(0,len(value),3):
             ListImage.append(value[i:i+3])
 
-           
+    # Convert the values to int :       
     ListImage = [int(x) for x in ListImage]  
-    print('ListImage:------------------------------------------------------------')
-    print(ListImage) 
-    print(len(ListImage))
-    # Convert the pixels into an array using numpy  
+
+    # Convert the pixels into an array using numpy :  
     image = np.array(ListImage, dtype=np.uint8)
     image = np.reshape(image,(width,height))      
-    # Use PIL to create an image from the new array of pixels
+
+    # Use PIL to create an image from the new array of pixels :
     new_image = Image.fromarray(image)
     new_image.save('decompressed.png')
 
@@ -117,13 +107,15 @@ img = cv2.imread('test.png',0)
 cv2.imshow('image', img)
 
 width,height = img.shape
-# Applatir l'image
+# Flatten the image
 input = img.flatten().tolist()
-print('input:------------------------------------------------------------')
-print(input)
-print(len(input))
+
+# Compression: 
 result=compress(input)
+
+# Decompression:
 decompress(result,width,height)
+
 
 
 
